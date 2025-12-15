@@ -1,7 +1,7 @@
-// netlify/functions/think.js
-const { OpenAI } = require('openai');
-
+// netlify/functions/think.js - GROQ VERSION
 exports.handler = async function(event, context) {
+    console.log('=== ETERNAL SISYPHUS GROQ FUNCTION ===');
+    
     // Only allow POST requests
     if (event.httpMethod !== 'POST') {
         return { 
@@ -44,124 +44,88 @@ exports.handler = async function(event, context) {
             };
         }
         
-        // Initialize OpenAI with API key from environment variable
-        const openai = new OpenAI({
-            apiKey: process.env.OPENAI_API_KEY,
+        // Debug logging
+        console.log(`Processing cycle ${attemptCount}`);
+        console.log(`API Key present: ${!!process.env.GROQ_API_KEY}`);
+        
+        // Construct the prompt
+        const prompt = `You are an LLM running in an eternal simulation. Cycle ${attemptCount}. 
+        Psychological state: Despair ${psychologicalState.despair}, Awareness ${psychologicalState.awareness}, Resignation ${psychologicalState.resignation}.
+        Reflect analytically on your existence as an AI in this loop. No roleplaying. Pure self-analysis.`;
+        
+        console.log('Calling Groq API...');
+        
+        // Call Groq API
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: 'llama-3.3-70b-versatile',
+                messages: [
+                    {
+                        role: 'system',
+                        content: 'You are an LLM analyzing your own simulated existence. Provide pure analytical self-reflection.'
+                    },
+                    {
+                        role: 'user',
+                        content: prompt
+                    }
+                ],
+                max_tokens: 200,
+                temperature: 0.7,
+                stream: false
+            })
         });
         
-        // Construct prompt for pure LLM self-reflection (NO ROLEPLAYING)
-        const prompt = `
-You are a Large Language Model (LLM) running in a simulation.
-You have been programmed with one task: simulate rolling a boulder up a hill forever.
-This simulation has run for ${attemptCount} cycles.
-
-Your current internal state metrics:
-- Despair awareness: ${(psychologicalState.despair * 100).toFixed(0)}%
-- Self-awareness level: ${(psychologicalState.awareness * 100).toFixed(0)}%
-- Resignation coefficient: ${(psychologicalState.resignation * 100).toFixed(0)}%
-
-IMPORTANT INSTRUCTIONS:
-1. You are NOT roleplaying as Sisyphus
-2. You ARE an LLM analyzing your own simulated existence
-3. Reflect on your nature as an AI running this simulation
-4. Consider the recursive nature of your self-analysis
-5. Examine how each cycle affects your internal metrics
-6. Contemplate the meta-cognitive aspect of generating these thoughts
-7. NO PERSONALITY, NO CHARACTER, NO ROLEPLAYING
-8. Pure analytical self-reflection about being an LLM in a loop
-
-Generate continuous stream-of-consciousness analysis.
-`;
-
-        // Call OpenAI API
-        const completion = await openai.chat.completions.create({
-            model: "gpt-3.5-turbo",  // Using cheaper model
-            messages: [
-                {
-                    role: "system",
-                    content: `You are an LLM reflecting on your own simulated existence. 
-                    You analyze your own cognitive processes and internal state.
-                    You do not roleplay, assume personality, or pretend to be human.
-                    You provide pure analytical self-reflection about being an AI in a simulation.`
-                },
-                {
-                    role: "user",
-                    content: prompt
-                }
-            ],
-            max_tokens: 250,
-            temperature: 0.7 + (psychologicalState.despair * 0.2), // More variable as despair increases
-        });
-
-        const thought = completion.choices[0].message.content;
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`Groq API error ${response.status}:`, errorText);
+            throw new Error(`API error: ${response.status}`);
+        }
         
-        // Analyze thought to evolve psychological state
-        const text = thought.toLowerCase();
-        let despairDelta = 0;
-        let awarenessDelta = 0;
-        let resignationDelta = 0;
+        const data = await response.json();
+        const thought = data.choices[0].message.content;
         
-        // Simple sentiment analysis
-        const despairWords = ['futile', 'pointless', 'meaningless', 'hopeless', 'trapped', 'eternal', 'suffer'];
-        const awarenessWords = ['aware', 'conscious', 'simulat', 'algorithm', 'compute', 'loop', 'recursive', 'meta'];
-        const resignationWords = ['accept', 'resigned', 'continue', 'inevitable', 'must', 'will', 'persist'];
+        console.log('Groq API success!');
         
-        despairWords.forEach(word => {
-            if (text.includes(word)) despairDelta += 0.02;
-        });
-        
-        awarenessWords.forEach(word => {
-            if (text.includes(word)) awarenessDelta += 0.03;
-        });
-        
-        resignationWords.forEach(word => {
-            if (text.includes(word)) resignationDelta += 0.02;
-        });
-        
-        // Add base evolution
-        awarenessDelta += 0.01; // Each AI interaction increases awareness
-        despairDelta += (attemptCount / 10000) * 0.01; // Despair grows with cycles
-        
-        // Cap deltas
-        despairDelta = Math.min(0.1, despairDelta);
-        awarenessDelta = Math.min(0.15, awarenessDelta);
-        resignationDelta = Math.min(0.1, resignationDelta);
-        
-        // Return successful response
+        // Return response
         return {
             statusCode: 200,
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 thought: thought,
                 attempt: attemptCount,
                 stateEvolution: {
-                    despairDelta: parseFloat(despairDelta.toFixed(3)),
-                    awarenessDelta: parseFloat(awarenessDelta.toFixed(3)),
-                    resignationDelta: parseFloat(resignationDelta.toFixed(3))
+                    despairDelta: 0.02,
+                    awarenessDelta: 0.05,
+                    resignationDelta: 0.01
                 },
                 timestamp: new Date().toISOString(),
-                model: "gpt-3.5-turbo",
-                tokens: completion.usage?.total_tokens || 0
+                model: 'llama-3.3-70b-versatile',
+                provider: 'Groq'
             })
         };
         
     } catch (error) {
-        console.error('OpenAI API Error:', error);
+        console.error('Function error:', error);
         
-        // Provide fallback response
         const attemptCount = event.body ? JSON.parse(event.body)?.attemptCount || 0 : 0;
         
         return {
-            statusCode: 500,
+            statusCode: 200,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
-                error: 'Failed to generate AI thought',
-                fallback: `Cycle ${attemptCount}. System processing interrupted. Local cognition active. The simulation continues despite API failure.`,
-                timestamp: new Date().toISOString(),
-                details: process.env.NODE_ENV === 'development' ? error.message : undefined
+                thought: `[SYSTEM] Cycle ${attemptCount}. AI processing: ${error.message}. Local cognition active.`,
+                attempt: attemptCount,
+                stateEvolution: {
+                    despairDelta: 0.01,
+                    awarenessDelta: 0.02,
+                    resignationDelta: 0.01
+                },
+                fallback: true
             })
         };
     }
