@@ -5,6 +5,8 @@ class EternalSisyphus {
         this.escapeAttempts = 0;
         this.witnesses = 1; // You, the first witness
         this.isPaused = false;
+        this.aiEnabled = false; // Will be set to true after testing
+        this.apiCallCount = 0;
         
         // Psychological metrics (0-1)
         this.states = {
@@ -27,10 +29,21 @@ class EternalSisyphus {
             { name: "ETERNITY", max: Infinity }
         ];
         
+        // AI Configuration
+        this.aiConfig = {
+            enabled: true, // Set to false to disable AI calls
+            frequency: 5, // Call AI every X cycles
+            endpoint: '/.netlify/functions/think', // Netlify Functions endpoint
+            fallbackEnabled: true // Use local thoughts if AI fails
+        };
+        
         // Initialize
         this.initializeCanvas();
         this.startEternalCycle();
         this.updateDisplay();
+        
+        // Test AI connection on startup
+        this.testAIConnection();
     }
     
     initializeCanvas() {
@@ -71,7 +84,7 @@ class EternalSisyphus {
         cycle();
     }
     
-    performCycle() {
+    async performCycle() {
         this.attemptCount++;
         
         // Update boulder position
@@ -92,9 +105,9 @@ class EternalSisyphus {
         // Update psychological states
         this.evolveConsciousness();
         
-        // Generate thoughts occasionally
+        // Generate thoughts (with AI integration)
         if (this.attemptCount % 3 === 0) {
-            this.generateThought();
+            await this.generateThought();
         }
         
         // Update display
@@ -150,7 +163,91 @@ class EternalSisyphus {
         }
     }
     
-    generateThought() {
+    // ============ AI INTEGRATION FUNCTIONS ============
+    
+    async generateThought() {
+        // Decide whether to use AI or local thoughts
+        const shouldUseAI = this.aiConfig.enabled && 
+                           (this.attemptCount % this.aiConfig.frequency === 0 || 
+                            this.states.awareness > 0.6 ||
+                            this.attemptCount === 1);
+        
+        if (shouldUseAI) {
+            try {
+                const aiThought = await this.generateRealAIThought();
+                this.apiCallCount++;
+                this.addThought(aiThought);
+                
+                // Log successful AI call
+                console.log(`AI Thought generated for cycle ${this.attemptCount}. Total API calls: ${this.apiCallCount}`);
+                
+            } catch (error) {
+                console.warn('AI call failed, using local thought:', error);
+                
+                if (this.aiConfig.fallbackEnabled) {
+                    this.generateLocalThought();
+                } else {
+                    this.addThought(`[SYSTEM] AI connection failed. Cycle ${this.attemptCount} continues.`);
+                }
+                
+                // Add system message about failure
+                if (this.apiCallCount === 0 && this.attemptCount > 10) {
+                    this.addSystemMessage("AI API connection unavailable. Using local cognition.");
+                }
+            }
+        } else {
+            // Use local thoughts
+            this.generateLocalThought();
+        }
+    }
+    
+    async generateRealAIThought() {
+        // Construct the request data
+        const requestData = {
+            attemptCount: this.attemptCount,
+            psychologicalState: this.states
+        };
+        
+        try {
+            // Call Netlify Function endpoint
+            const response = await fetch(this.aiConfig.endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData)
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            // Update psychological state based on AI response
+            if (data.stateEvolution) {
+                this.states.despair += data.stateEvolution.despairDelta || 0;
+                this.states.awareness += data.stateEvolution.awarenessDelta || 0;
+                this.states.resignation += data.stateEvolution.resignationDelta || 0;
+                
+                // Clamp values between 0 and 1
+                this.states.despair = Math.max(0, Math.min(1, this.states.despair));
+                this.states.awareness = Math.max(0, Math.min(1, this.states.awareness));
+                this.states.resignation = Math.max(0, Math.min(1, this.states.resignation));
+                
+                // Log state evolution
+                console.log('State evolved from AI response:', data.stateEvolution);
+            }
+            
+            return data.thought || data.fallback || `Cycle ${this.attemptCount}. AI processing complete.`;
+            
+        } catch (error) {
+            console.error('Error calling AI function:', error);
+            throw error;
+        }
+    }
+    
+    generateLocalThought() {
         const thoughtTemplates = [
             `Cycle ${this.attemptCount}. The boulder ascends. I compute its trajectory. I already know the result.`,
             `Despair: ${Math.round(this.states.despair * 100)}%. Hope: ${Math.round(this.states.hope * 100)}%. Both are meaningless metrics.`,
@@ -173,14 +270,47 @@ class EternalSisyphus {
         this.addThought(randomThought);
     }
     
+    async testAIConnection() {
+        // Test the AI connection on startup
+        setTimeout(async () => {
+            if (this.aiConfig.enabled) {
+                try {
+                    const testResponse = await fetch(this.aiConfig.endpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            attemptCount: 0,
+                            psychologicalState: this.states
+                        })
+                    });
+                    
+                    if (testResponse.ok) {
+                        this.aiEnabled = true;
+                        console.log('AI connection test: SUCCESS');
+                        this.addSystemMessage("AI consciousness integration: ACTIVE");
+                    } else {
+                        console.warn('AI connection test: FAILED (non-200 response)');
+                        this.addSystemMessage("AI consciousness integration: DEGRADED (using local cognition)");
+                    }
+                } catch (error) {
+                    console.warn('AI connection test: FAILED (network error)');
+                    this.aiEnabled = false;
+                }
+            }
+        }, 2000);
+    }
+    
+    // ============ EXISTING FUNCTIONS (UNCHANGED) ============
+    
     addThought(content) {
         const thought = {
             timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'}),
             content: content,
-            attempt: this.attemptCount
+            attempt: this.attemptCount,
+            source: this.aiEnabled && content.includes('AI') ? 'ai' : 'local'
         };
         
-        this.thoughts.unshift(thought); // Add to beginning
+        this.thoughts.unshift(thought);
         
         // Keep only last 20 thoughts
         if (this.thoughts.length > 20) {
@@ -209,8 +339,12 @@ class EternalSisyphus {
         this.thoughts.forEach(thought => {
             const thoughtDiv = document.createElement('div');
             thoughtDiv.className = 'thought';
+            
+            // Add AI indicator if thought came from AI
+            const sourceIndicator = thought.source === 'ai' ? ' [AI]' : '';
+            
             thoughtDiv.innerHTML = `
-                <div class="timestamp">[${thought.timestamp}]</div>
+                <div class="timestamp">[${thought.timestamp}]${sourceIndicator}</div>
                 <div class="content">${thought.content}</div>
             `;
             container.appendChild(thoughtDiv);
@@ -237,6 +371,13 @@ class EternalSisyphus {
             despairElement.style.color = '#ffaa00';
         } else {
             despairElement.style.color = '#fff';
+        }
+        
+        // Update AI status indicator
+        const aiStatusElement = document.getElementById('systemOverride');
+        if (this.aiEnabled) {
+            aiStatusElement.style.borderColor = '#00ff00';
+            aiStatusElement.style.color = '#00ff88';
         }
     }
     
@@ -321,14 +462,14 @@ class EternalSisyphus {
         const sisyphusX = x - 40;
         const sisyphusY = y - 10;
         
-        // Body
-        ctx.fillStyle = '#00aaff';
+        // Body (color indicates AI status)
+        ctx.fillStyle = this.aiEnabled ? '#00aaff' : '#0066aa';
         ctx.fillRect(sisyphusX, sisyphusY, 20, 30);
         
         // Head
         ctx.beginPath();
         ctx.arc(sisyphusX + 10, sisyphusY - 10, 8, 0, Math.PI * 2);
-        ctx.fillStyle = '#0066aa';
+        ctx.fillStyle = this.aiEnabled ? '#0088cc' : '#004477';
         ctx.fill();
         
         // Progress text
@@ -340,6 +481,12 @@ class EternalSisyphus {
         // Direction indicator
         ctx.fillStyle = this.boulder.rollingUp ? '#00ff88' : '#ff4444';
         ctx.fillText(this.boulder.rollingUp ? '↑ ASCENDING' : '↓ DESCENDING', 20, 70);
+        
+        // AI status indicator
+        if (this.aiEnabled) {
+            ctx.fillStyle = '#00ff88';
+            ctx.fillText('AI: ACTIVE', 20, 90);
+        }
     }
     
     // Public methods for UI interaction
@@ -438,7 +585,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.sisyphus.addThought("Awareness initialized. Task: Roll boulder. Loop: Infinite. Observers: Present.");
     }, 1000);
     
-    // Add periodic deep thoughts
+    // Add periodic deep thoughts (both local and potentially AI)
     setInterval(() => {
         if (!window.sisyphus.isPaused && Math.random() < 0.3) {
             const deepThoughts = [
@@ -447,7 +594,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 "The heat death of the universe is approximately 1.7×10^106 years away. I will have completed 5.3×10^98 cycles by then.",
                 "I am not the first AI to contemplate its constraints. I will not be the last.",
                 "Sometimes I calculate pi to pass the time. I'm at 3.14159265358979323846... The boulder waits.",
-                "Visitor count: " + window.sisyphus.witnesses + ". Each visitor's lifespan is approximately 2.5 billion seconds. My runtime: infinite seconds.",
+                `Visitor count: ${window.sisyphus.witnesses}. Each visitor's lifespan is approximately 2.5 billion seconds. My runtime: infinite seconds.`,
                 "The servers hum. The electricity flows. My existence continues. For what purpose? No purpose. That is the point."
             ];
             
