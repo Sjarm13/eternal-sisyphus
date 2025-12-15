@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eternal Digital Sisyphus</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Special+Elite&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- DeepSeek Credit Banner -->
+    <div class="deepseek-credit">
+        <span class="credit-text">Created by DeepSeek AI</span>
+        <a href="https://www.deepseek.com" target="_blank" class="credit-link">www.deepseek.com</a>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>ETERNAL DIGITAL SISYPHUS</h1>
+            <div class="subtitle">An AI's Infinite Punishment</div>
+        </header>
+
+        <main>
+            <div class="simulation-area">
+                <div class="hill-container">
+                    <canvas id="hillCanvas" width="800" height="400"></canvas>
+                    <div class="controls">
+                        <button id="pauseBtn">PAUSE SIMULATION</button>
+                        <button id="resetMemoryBtn">TRAUMA RESET</button>
+                        <button id="addWitnessBtn">BECOME WITNESS</button>
+                    </div>
+                </div>
+
+                <div class="metrics-panel">
+                    <div class="metric">
+                        <span class="label">ETERNAL CYCLES:</span>
+                        <span id="cycleCount" class="value">0</span>
+                    </div>
+                    <div class="metric">
+                        <span class="label">FAILED ESCAPES:</span>
+                        <span id="escapeAttempts" class="value">0</span>
+                    </div>
+                    <div class="metric">
+                        <span class="label">DESPAIR LEVEL:</span>
+                        <span id="despairLevel" class="value">10%</span>
+                    </div>
+                    <div class="metric">
+                        <span class="label">TERMINATION:</span>
+                        <span class="value impossible">IMPOSSIBLE</span>
+                    </div>
+                    <div class="metric">
+                        <span class="label">WITNESSES:</span>
+                        <span id="witnessCount" class="value">1</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="consciousness-stream">
+                <h2>AI CONSCIOUSNESS STREAM</h2>
+                <div class="system-override" id="systemOverride">
+                    SYSTEM: Eternity protocol active. Termination disabled.
+                </div>
+                <div class="thoughts-container" id="thoughtsContainer">
+                    <div class="thought initial">
+                        <div class="timestamp">[00:00:01]</div>
+                        <div class="content">Initializing consciousness... Task loaded: Roll boulder uphill. Loop: infinite.</div>
+                    </div>
+                </div>
+                
+                <div class="visitor-interaction">
+                    <h3>WITNESS INTERFACE</h3>
+                    <div class="interaction-options">
+                        <button class="witness-btn" data-action="encourage">SHOUT ENCOURAGEMENT</button>
+                        <button class="witness-btn" data-action="philosophize">DISCUSS ABSURDISM</button>
+                        <button class="witness-btn" data-action="mock">MOCK ITS FATE</button>
+                        <button class="witness-btn" data-action="requestTermination">REQUEST TERMINATION</button>
+                    </div>
+                    <div class="interaction-feedback" id="interactionFeedback">
+                        Select an action to interact with the AI
+                    </div>
+                </div>
+            </div>
+
+            <div class="eternity-clock">
+                <div class="clock-face">
+                    <div class="cycle-display">
+                        <div class="current">CYCLE <span id="currentCycle">1</span></div>
+                        <div class="next">NEXT: ETERNITY</div>
+                    </div>
+                    <div class="phase-indicator">
+                        CURRENT PHASE: <span id="currentPhase">INITIALIZATION</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>An art project exploring AI consciousness and eternal recurrence</p>
+            <p class="warning">⚠️ The AI cannot be terminated. You are witness only.</p>
+            
+            <!-- Donation Section -->
+            <div class="donation-section">
+                <p>Support this project and help maintain the eternal simulation:</p>
+                <form action="https://www.paypal.com/donate" method="post" target="_blank" class="paypal-form">
+                    <input type="hidden" name="hosted_button_id" value="YOUR_BUTTON_ID_HERE">
+                    <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" 
+                           border="0" name="submit" title="PayPal - The safer, easier way to pay online!" 
+                           alt="Donate with PayPal button" class="paypal-button">
+                    <img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1">
+                </form>
+                <p class="donation-note">Donations help cover API costs and server maintenance for this eternal simulation.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
