@@ -83,9 +83,13 @@ h1 {
 }
 
 .subtitle {
-    font-size: 1.1rem;
-    color: #888;
+    font-size: 1.2rem;
+    color: #00aaff;
     font-style: italic;
+    margin-top: 10px;
+    text-shadow: 0 0 8px rgba(0, 170, 255, 0.3);
+    font-weight: 300;
+    letter-spacing: 0.5px;
 }
 
 .simulation-area {
@@ -366,7 +370,53 @@ footer {
     font-weight: bold;
 }
 
-/* Donation Section */
+/* PayPal Link Styling */
+.paypal-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(90deg, #0070ba, #1546a0);
+    color: white;
+    padding: 14px 28px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.1rem;
+    transition: all 0.3s;
+    margin: 20px 0;
+    border: 2px solid #003087;
+    box-shadow: 0 4px 12px rgba(0, 112, 186, 0.3);
+}
+
+.paypal-link:hover {
+    background: linear-gradient(90deg, #005ea6, #0d3a7c);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 112, 186, 0.4);
+}
+
+.paypal-logo {
+    height: 30px;
+    filter: brightness(0) invert(1);
+}
+
+.cost-breakdown {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    padding: 15px;
+    margin: 15px 0;
+    border-left: 4px solid #00aaff;
+}
+
+.cost-item {
+    color: #aaa;
+    margin: 8px 0;
+    font-size: 0.9rem;
+}
+
+.cost-item strong {
+    color: #00ffaa;
+}
+
 .donation-section {
     margin-top: 30px;
     padding: 20px;
@@ -383,21 +433,6 @@ footer {
     color: #aaa;
     margin-bottom: 15px;
     font-size: 0.95rem;
-}
-
-.paypal-form {
-    margin: 15px 0;
-}
-
-.paypal-button {
-    height: 47px;
-    border-radius: 5px;
-    transition: transform 0.3s;
-}
-
-.paypal-button:hover {
-    transform: scale(1.05);
-    cursor: pointer;
 }
 
 .donation-note {
@@ -455,5 +490,18 @@ footer {
         flex-direction: column;
         gap: 5px;
         padding: 10px;
+    }
+    
+    .paypal-link {
+        padding: 12px 20px;
+        font-size: 1rem;
+    }
+    
+    .clock-face {
+        padding: 20px;
+    }
+    
+    .current {
+        font-size: 2rem;
     }
 }
